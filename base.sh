@@ -1,0 +1,16 @@
+python main.py \
+    --data_rate 0.1 \
+    --detail_log 1 \
+    --port 17586 \
+    --save_prefix debugging \
+    --do_train 1 \
+    --do_short 1 \
+    --seed 1 \
+    --g 1\
+    --max_epoch 3 \
+    --train_path '../../woz-data/MultiWOZ_2.1/train_data.json' \
+    --dev_path '../../woz-data/MultiWOZ_2.1/dev_data.json' \
+    --test_path '../../woz-data/MultiWOZ_2.1/test_data.json' \
+    --max_length 512 \
+    --batch_size 8 \
+    --test_batch_size 16 \
