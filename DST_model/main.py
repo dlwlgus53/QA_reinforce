@@ -46,6 +46,7 @@ parser.add_argument("--dev_path", type=str)
 parser.add_argument("--train_path", type=str)
 parser.add_argument("--test_path", type=str)
 parser.add_argument("--except_domain", type=str)
+parser.add_argument("--description", type=str)
 
 
 args = parser.parse_args()
@@ -146,35 +147,30 @@ def evaluate():
     )
 
     logger.info(f"model/woz{args.save_prefix}/r_{args.except_domain}.pt")
-    test_model_paths = f"model/woz{args.save_prefix}/r_{args.except_domain}.pt"
+    test_model_path = f"model/woz{args.save_prefix}/r_{args.except_domain}.pt"
 
-    for test_model_path in test_model_paths:
-        logger.info(
-            f"User pretrained model model/woz{args.save_prefix}/r_{args.except_domain}.pt"
-        )
-        state_dict = torch.load(
-            f"model/woz{args.save_prefix}/r_{args.except_domain}.pt"
-        )
-        new_state_dict = OrderedDict()
-        for k, v in state_dict.items():
-            name = k.replace(
-                "module.", ""
-            )  # remove 'module.' of DataParallel/DistributedDataParallel
-            new_state_dict[name] = v
-        model = T5ForConditionalGeneration.from_pretrained(
-            args.base_trained, return_dict=True
-        ).to("cuda")
-        model.load_state_dict(new_state_dict)
+    logger.info(
+        f"User pretrained model model/woz{args.save_prefix}/r_{args.except_domain}.pt"
+    )
+    state_dict = torch.load(test_model_path)
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        name = k.replace(
+            "module.", ""
+        )  # remove 'module.' of DataParallel/DistributedDataParallel
+        new_state_dict[name] = v
+    model = T5ForConditionalGeneration.from_pretrained(
+        args.base_trained, return_dict=True
+    ).to("cuda")
+    model.load_state_dict(new_state_dict)
 
-        joint_goal_acc, slot_acc, F1, detail_wrong, loss = test(args, model, loader)
+    joint_goal_acc, slot_acc, F1, detail_wrong, loss = test(args, model, loader)
 
-        logger.info(
-            f"file {test_model_path} JGA : {joint_goal_acc} F1 : {F1} Slot Acc : {slot_acc} F1 : {F1} Loss : {loss}"
-        )
+    logger.info(
+        f"file {test_model_path} JGA : {joint_goal_acc} F1 : {F1} Slot Acc : {slot_acc} F1 : {F1} Loss : {loss}"
+    )
 
-        utils.dict_to_json(
-            detail_wrong, f"{args.save_prefix}_{args.except_domain}.json"
-        )
+    utils.dict_to_json(detail_wrong, f"{args.save_prefix}_{args.except_domain}.json")
 
 
 if __name__ == "__main__":

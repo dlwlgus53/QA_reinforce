@@ -12,6 +12,7 @@ CUDA_VISIBLE_DEVICES=2  python main.py \
     --max_length 512 \
     --batch_size 8 \
     --test_batch_size 16 \
+    --description 'description1'
 
 
 

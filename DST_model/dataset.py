@@ -20,6 +20,7 @@ class Dataset(torch.utils.data.Dataset):
         self.tokenizer = args.tokenizer
         self.max_length = args.max_length
         self.except_domain = args.except_domain
+        self.description = args.description
         raw_path = data_path
         if args.do_short:
             raw_path = f"../../woz_data/train_data_short.json"
@@ -80,7 +81,8 @@ class Dataset(torch.utils.data.Dataset):
                 for key_idx, key in enumerate(ontology.QA["all-domain"]):
                     if self.except_domain and self.except_domain in key:
                         continue  # TODO check this
-                    q = ontology.QA[key]["description2"]
+
+                    q = ontology.QA[key][self.description]
 
                     if key in turn["belief"]:  # 언급을 한 경우
                         a = turn["belief"][key]
