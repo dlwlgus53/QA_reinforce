@@ -51,7 +51,7 @@ class Dataset(torch.utils.data.Dataset):
                 tokenized = self.tokenizer.batch_encode_plus(
                     [text], padding=False, return_tensors=return_tensors
                 )  # TODO : special token
-                if len(tokenized) > self.max_length:
+                if len(tokenized['input_ids'][0]) > self.max_length:
                     idx = [m.start() for m in re.finditer("\[user\]", text)]
                     text = text[: idx[0]] + text[idx[1] :]  # delete one turn
                 else:
@@ -181,8 +181,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--do_short", type=int, default=1)
     parser.add_argument("--seed", type=float, default=1)
-    parser.add_argument("--max_length", type=int, default=128)
+    parser.add_argument("--max_length", type=int, default=100)
     parser.add_argument("--except_domain", type=str, default="hotel")
+    parser.add_argument("--description", type=str, default="description1")
 
     args = parser.parse_args()
 
@@ -198,8 +199,8 @@ if __name__ == "__main__":
     t = args.tokenizer
     for batch in loader:
         for i in range(16):
-            print(t.decode(batch["input"]["input_ids"][i]))
-            print(t.decode(batch["target"]["input_ids"][i]))
-            print()
+            # print(t.decode(batch["input"]["input_ids"][i]))
+            # print(t.decode(batch["target"]["input_ids"][i]))
+            # print()
+            pass
 
-        pdb.set_trace()
