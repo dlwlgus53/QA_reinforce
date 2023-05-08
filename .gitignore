@@ -7,7 +7,7 @@ logs/
 model/
 # C extensions
 *.so
-
+*.sh
 # Distribution / packaging
 .Python
 build/
