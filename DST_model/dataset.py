@@ -22,9 +22,12 @@ class Dataset(torch.utils.data.Dataset):
         self.except_domain = args.except_domain
         self.description = args.description
         raw_path = data_path
-        if args.do_short:
-            raw_path = f"../../woz_data/train_data_short.json"
-
+        if args.do_short :
+            if data_type == 'train':
+                raw_path = "../../woz_data/train_data_short.json"
+            else:
+                raw_path = "../../woz_data/dev_data_short.json"
+                
         logger.info(f"load {self.data_type} raw file {raw_path}")
         raw_dataset = json.load(open(raw_path, "r"))
         turn_id, dial_id, question, schema, answer, context = self.seperate_data(
@@ -105,7 +108,8 @@ class Dataset(torch.utils.data.Dataset):
             [t, d, q, s, a]
             for (t, d, q, s, a) in zip(turn_id, dial_id, question, schema, answer)
         ]
-        sorted_items = sorted(for_sort, key=lambda x: (x[0], x[1]))
+        
+        sorted_items = sorted(for_sort, key=lambda x: (x[0], x[1])) # from easy to hard
 
         turn_id = [s[0] for s in sorted_items]
         dial_id = [s[1] for s in sorted_items]

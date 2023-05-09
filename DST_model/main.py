@@ -26,6 +26,7 @@ parser.add_argument("--do_short", type=int, default=1)
 parser.add_argument("--batch_size", type=int, default=4)
 parser.add_argument("--test_batch_size", type=int, default=16)
 parser.add_argument("--max_epoch", type=int, default=1)
+parser.add_argument("--patience", type=int, default=3)
 parser.add_argument(
     "--base_trained", type=str, default="t5-small", help=" pretrainned model from 🤗"
 )
@@ -108,14 +109,16 @@ def main_worker(model):
     min_loss = float("inf")
     best_performance = {}
     logger.info("Training start")
-
+    p =0
     for epoch in range(args.max_epoch):
         train(args, model, train_loader, optimizer)
         loss = valid(args, model, dev_loader)
         logger.info("Epoch : %d,  Loss : %.04f" % (epoch, loss))
 
         if loss < min_loss:
-            logger.info("New best")
+            p =0
+            logger.info(f"New best current loss : {loss:.4f} previous loss {min_loss:.4f}")
+            logger.info(f"Patience : {p}/{args.patience}")
             min_loss = loss
             best_performance["min_loss"] = min_loss.item()
             torch.save(
@@ -128,6 +131,13 @@ def main_worker(model):
                 f"safely saved in model/woz{args.save_prefix}/epoch_{epoch}r_{args.except_domain}.pt"
             )
             logger.info(f"val loss : {loss}")
+            
+        else:
+            p +=1
+            logger.info(f"Patience : {p}/{args.patience}")
+            if p>args.patience:
+                logger.info(f"Eaerly stopping in {epoch}")
+                break
 
     logger.info(f"Best Score :  {best_performance}")
 
