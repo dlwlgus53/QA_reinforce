@@ -1,23 +1,47 @@
-QA = {
-    "general-question": "are they talking about",
+{
     "hotel-pricerange": {
         "description1": "what is the price budget for the hotel?(categorical)",
         "description2": "what is the cost of the hotel?",
-        "values": ["cheap", "moderate", "expensive", "dontcare", "not mentioned"],
+        "values": [
+            "cheap",
+            "moderate",
+            "expensive",
+            "dontcare",
+            "not mentioned"
+        ],
+        "description3": "hotel-pricerange",
+        "description4": "What is the price budget for the hotel?"
     },
     "hotel-type": {
         "description1": "what is the type of hotel?(categorical)",
         "description2": "what is the hotel type?",
-        "values": ["hotel", "guesthouse", "dontcare", "not mentioned"],
+        "values": [
+            "hotel",
+            "guesthouse",
+            "dontcare",
+            "not mentioned"
+        ],
+        "description3": "hotel-type",
+        "description4": "What is the type of hotel?"
     },
     "hotel-parking": {
         "description1": "does the hotel have a parking lot?(yes/no)",
         "description2": "does the hotel have a parking lot?",
-        "values": ["yes", "no", "free", "dontcare", "not mentioned"],
+        "values": [
+            "yes",
+            "no",
+            "free",
+            "dontcare",
+            "not mentioned"
+        ],
+        "description3": "hotel-parking",
+        "description4": "Does the hotel have a parking lot?"
     },
     "hotel-stay": {
         "description1": "how long did user book the hotel?(number)",
         "description2": "how long did user book the hotel?",
+        "description3": "hotel-stay",
+        "description4": "For how long did the user book the hotel?"
     },
     "hotel-day": {
         "description1": "what day did user book the hotel?(day)",
@@ -31,30 +55,56 @@ QA = {
             "saturday",
             "sunday",
             "dontcare",
-            "not mentioned",
+            "not mentioned"
         ],
+        "description3": "hotel-day",
+        "description4": "On which day did the user book the hotel?"
     },
     "hotel-people": {
         "description1": "what is the number of people for the hotel booking?(number)",
         "description2": "how many people will stay at the hotel?",
+        "description3": "hotel-people",
+        "description4": "How many people are included in the hotel booking?"
     },
     "hotel-area": {
         "description1": "where is the area of the hotel?(categorical)",
         "description2": "where is the area of the hotel?",
+        "description3": "hotel-area",
+        "description4": "Where is the area of the hotel?"
     },
     "hotel-stars": {
         "description1": "what is the star rating of the hotel?(categorical)",
         "description2": "what is the star rating of the hotel?",
-        "values": ["0", "1", "2", "3", "4", "5", "dontcare", "not mentioned"],
+        "values": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "dontcare",
+            "not mentioned"
+        ],
+        "description3": "hotel-stars",
+        "description4": "What is the star rating of the hotel?"
     },
     "hotel-internet": {
         "description1": "does the user want a hotel with internet access?(yes/no)",
         "description2": "does the user want a hotel with internet access?",
-        "values": ["yes", "no", "dontcare", "not mentioned"],
+        "values": [
+            "yes",
+            "no",
+            "dontcare",
+            "not mentioned"
+        ],
+        "description3": "hotel-internet",
+        "description4": "Does the user require a hotel with internet access?"
     },
     "train-destination": {
         "description1": "where is destination of train?(extract)",
         "description2": "where is the train's destination?",
+        "description3": "train-destination",
+        "description4": "Where is the destination of the train?"
     },
     "train-day": {
         "description1": "what day did user book the train?(day)",
@@ -68,73 +118,113 @@ QA = {
             "saturday",
             "sunday",
             "dontcare",
-            "not mentioned",
+            "not mentioned"
         ],
+        "description3": "train-day",
+        "description4": "On which day did the user book the train?"
     },
     "train-departure": {
         "description1": "where is the departure location of train?(extract)",
         "description2": "where is the departure location of train?",
+        "description3": "train-departure",
+        "description4": "Where is the departure location of the train?"
     },
     "train-arrive": {
         "description1": "when is the train arriving?(time)",
         "description2": "when is the train arriving?",
+        "description3": "train-arrive",
+        "description4": "When is the train expected to arrive?"
     },
     "train-people": {
         "description1": "what is the number of people for the train booking?(number)",
         "description2": "what is the number of people for the train booking?",
+        "description3": "train-people",
+        "description4": "How many people are included in the train booking?"
     },
     "train-leave": {
         "description1": "when is the train leaving?(time)",
         "description2": "when is the train leaving?",
+        "description3": "train-leave",
+        "description4": "When is the train scheduled to leave?"
     },
     "attraction-area": {
         "description1": "what is the area of the attraction?(categorical)",
         "description2": "where is the attraction?",
+        "description3": "attraction-area",
+        "description4": "What is the area of the attraction?"
     },
     "restaurant-food": {
         "description1": "what kind of food do restaurants serve?(extract)",
         "description2": "what kind of food do restaurants serve?",
+        "description3": "restaurant-food",
+        "description4": "What kind of food is served in restaurants?"
     },
     "restaurant-pricerange": {
         "description1": "what is the price budget for the restaurant?(categorical)",
         "description2": "what is the price budget for the restaurant?",
-        "values": ["expensive", "cheap", "moderate", "dontcare", "not mentioned"],
+        "values": [
+            "expensive",
+            "cheap",
+            "moderate",
+            "dontcare",
+            "not mentioned"
+        ],
+        "description3": "restaurant-pricerange",
+        "description4": "What is the price budget for the restaurant?"
     },
     "restaurant-area": {
         "description1": "where is the area of the restaurant?(categorical)",
         "description2": "Where is the restaurant located?",
+        "description3": "restaurant-area",
+        "description4": "Where is the area of the restaurant?"
     },
     "attraction-name": {
         "description1": "what is attraction name?(extract)",
         "description2": "what is attraction name?",
+        "description3": "attraction-name",
+        "description4": "What is the name of the attraction?"
     },
     "restaurant-name": {
         "description1": "what is restaurant name?(extract)",
         "description2": "what is the name of the restaurant?",
+        "description3": "restaurant-name",
+        "description4": "What is the name of the restaurant?"
     },
     "attraction-type": {
         "description1": "what is the type of attraction?(categorical)",
         "description2": "what are the types of attraction?",
+        "description3": "attraction-type",
+        "description4": "What is the type of attraction?"
     },
     "hotel-name": {
         "description1": "what is hotel name?(extract)",
         "description2": "what name hotel do users want to stay in?",
+        "description3": "hotel-name",
+        "description4": "What is the name of the hotel?"
     },
     "taxi-leave": {
         "description1": "when is the taxi leaving?(time)",
         "description2": "What time does the taxi leave?",
+        "description3": "taxi-leave",
+        "description4": "When is the taxi scheduled to leave?"
     },
     "taxi-destination": {
         "description1": "where is destination of taxi?(extract)",
         "description2": "where is destination of taxi?",
+        "description3": "taxi-destination",
+        "description4": "Where is the destination of the taxi?"
     },
     "taxi-departure": {
         "description1": "where is the departure location of taxi?(extract)",
         "description2": "where is the taxi's departure point?",
+        "description3": "taxi-departure",
+        "description4": "Where is the departure location of the taxi?"
     },
     "restaurant-time": {
         "description1": "when is the book time of restaurant?(time)",
         "description2": "when is the book time of restaurant?",
+        "description3": "restaurant-time",
+        "description4": "When was the restaurant booked?"
     },
     "restaurant-day": {
         "description1": "What day did user book the restaurant?(day)",
@@ -148,16 +238,22 @@ QA = {
             "saturday",
             "sunday",
             "dontcare",
-            "not mentioned",
+            "not mentioned"
         ],
+        "description3": "restaurant-day",
+        "description4": "On which day did the user book the restaurant?"
     },
     "restaurant-people": {
         "description1": "what is the number of people for the restaurant booking?(number)",
         "description2": "how many people make a reservation for a restaurant?",
+        "description3": "restaurant-people",
+        "description4": "How many people are included in the restaurant booking?"
     },
     "taxi-arrive": {
         "description1": "when is the taxi arriving?(time)",
         "description2": "when will the taxi arrive?",
+        "description3": "taxi-arrive",
+        "description4": "When is the taxi expected to arrive?"
     },
     "multichoice-domain": [
         "hotel-pricerange",
@@ -168,7 +264,7 @@ QA = {
         "hotel-internet",
         "train-day",
         "restaurant-pricerange",
-        "restaurant-day",
+        "restaurant-day"
     ],
     "extract-domain": [
         "attraction-type",
@@ -191,7 +287,7 @@ QA = {
         "taxi-leave",
         "taxi-destination",
         "taxi-departure",
-        "restaurant-time",
+        "restaurant-time"
     ],
     "all-domain": [
         "hotel-pricerange",
@@ -223,11 +319,14 @@ QA = {
         "taxi-leave",
         "taxi-destination",
         "taxi-departure",
-        "restaurant-time",
+        "restaurant-time"
     ],
-    "bigger-domain": ["train", "taxi", "hotel", "restaurant", "attraction"],
-    "NOT_MENTIONED": "not mentioned",
+    "bigger-domain": [
+        "train",
+        "taxi",
+        "hotel",
+        "restaurant",
+        "attraction"
+    ],
+    "NOT_MENTIONED": "not mentioned"
 }
-
-
-# all-domian에 next response있어야함

@@ -2,7 +2,6 @@ import torch
 import pdb
 import json
 import logging
-import ontology
 from utils import *
 from collections import defaultdict
 
@@ -69,7 +68,7 @@ def valid(args, model, dev_loader):
 
 def test(args, model, test_loader):
     belief_state = defaultdict(lambda: defaultdict(dict))  # dial_id, # turn_id # schema
-
+    ontology = json.load(open(args.ontology_path, "r"))
     model.eval()
     loss_sum = 0
     logger.info("Test start")
@@ -96,7 +95,7 @@ def test(args, model, test_loader):
                 schema = batch["schema"][idx]
                 if turn_id not in belief_state[dial_id].keys():
                     belief_state[dial_id][turn_id] = {}
-                if outputs_text[idx] == ontology.QA["NOT_MENTIONED"]:
+                if outputs_text[idx] == ontology["NOT_MENTIONED"]:
                     continue
 
                 belief_state[dial_id][turn_id][schema] = outputs_text[idx]

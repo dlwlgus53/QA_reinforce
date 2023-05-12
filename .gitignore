@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+temp.py
+./DST_model/temp.py
 out/
 logs/
 model/

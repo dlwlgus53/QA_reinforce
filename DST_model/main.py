@@ -46,6 +46,7 @@ parser.add_argument("-g", "--gpus", default=4, type=int, help="number of gpus pe
 parser.add_argument("--dev_path", type=str)
 parser.add_argument("--train_path", type=str)
 parser.add_argument("--test_path", type=str)
+parser.add_argument("--ontology_path", type=str, default = './QA.json')
 parser.add_argument("--except_domain", type=str)
 parser.add_argument("--description", type=str)
 

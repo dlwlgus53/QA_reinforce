@@ -3,7 +3,6 @@ import pdb
 import json
 import torch
 import pickle
-import ontology
 from tqdm import tqdm
 import logging
 from log_conf import init_logger
@@ -21,6 +20,8 @@ class Dataset(torch.utils.data.Dataset):
         self.max_length = args.max_length
         self.except_domain = args.except_domain
         self.description = args.description
+        self.ontology = json.load(open(args.ontology_path,"r"))
+        
         raw_path = data_path
         if args.do_short :
             if data_type == 'train':
@@ -45,7 +46,6 @@ class Dataset(torch.utils.data.Dataset):
         self.question = question
         self.schema = schema
         self.context = context
-
     def encode(self, texts, return_tensors="pt"):
         examples = []
         for i, text in enumerate(texts):
@@ -81,18 +81,18 @@ class Dataset(torch.utils.data.Dataset):
             for t_id, turn in enumerate(dialogue):
                 dialogue_text += "[user] "
                 dialogue_text += turn["user"]
-                for key_idx, key in enumerate(ontology.QA["all-domain"]):
+                for key_idx, key in enumerate(self.ontology["all-domain"]):
                     if self.except_domain and self.except_domain in key:
                         continue  # TODO check this
 
-                    q = ontology.QA[key][self.description]
+                    q = self.ontology[key][self.description]
 
                     if key in turn["belief"]:  # 언급을 한 경우
                         a = turn["belief"][key]
                         if isinstance(a, list):
                             a = a[0]  # in muptiple type, a == ['sunday',6]
                     else:
-                        a = ontology.QA["NOT_MENTIONED"]
+                        a = self.ontology["NOT_MENTIONED"]
 
                     schema.append(key)
                     answer.append(a)

@@ -3,7 +3,6 @@ import os
 import csv, json
 import string
 import logging
-import ontology
 from collections import defaultdict, Counter
 import pdb
 
@@ -37,9 +36,9 @@ def makedirs(path):
 
 def evaluate_metrics(all_prediction, raw_file, detail_log, except_domain):
     # domain, schema accuracy 는 틀린부분이 있어서 return 하지 않음.
-
-    schema = ontology.QA["all-domain"]  # next response 는 제외
-    domain = ontology.QA["bigger-domain"]
+    ontology = json.load(open("./QA.json", "r"))
+    schema = ontology["all-domain"]  # next response 는 제외
+    domain = ontology["bigger-domain"]
 
     detail_wrongs = defaultdict(
         lambda: defaultdict(list)
@@ -47,7 +46,6 @@ def evaluate_metrics(all_prediction, raw_file, detail_log, except_domain):
     turn_acc, joint_acc, micro_f1, turn_cnt, joint_cnt = 0, 0, 0, 0, 0
     schema_acc = {s: 0 for s in schema}
     domain_acc = {s: 0 for s in domain}
-    pdb.set_trace()
     for key in raw_file.keys():
         if key not in all_prediction.keys():
             continue
@@ -133,7 +131,7 @@ def compute_acc(gold, pred, slot_temp, domain, detail_log):
                         detail_wrong.append((g, p))
                         break
                 else:
-                    detail_wrong.append((g, ontology.QA["NOT_MENTIONED"]))
+                    detail_wrong.append((g, ontology["NOT_MENTIONED"]))
 
     wrong_pred = 0
     for p in pred:
@@ -142,7 +140,7 @@ def compute_acc(gold, pred, slot_temp, domain, detail_log):
             schema_acc[p.split(" : ")[0]] -= 1
             domain_acc[p.split("-")[0]] -= 1
             if detail_log:
-                detail_wrong.append((ontology.QA["NOT_MENTIONED"], p))
+                detail_wrong.append((ontology["NOT_MENTIONED"], p))
 
     ACC_TOTAL = len(slot_temp)
     ACC = len(slot_temp) - miss_gold - wrong_pred
