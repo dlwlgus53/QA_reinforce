@@ -144,7 +144,7 @@ def main_worker(model):
 
 def evaluate():
     if args.do_short:
-        args.test_path = "../../woz_data/train_data_short.json"
+        args.test_path = "../../woz_data/dev_data_short.json"
 
     test_dataset = Dataset(args, args.test_path, "test")
     loader = torch.utils.data.DataLoader(

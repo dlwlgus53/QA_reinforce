@@ -47,6 +47,7 @@ def evaluate_metrics(all_prediction, raw_file, detail_log, except_domain):
     turn_acc, joint_acc, micro_f1, turn_cnt, joint_cnt = 0, 0, 0, 0, 0
     schema_acc = {s: 0 for s in schema}
     domain_acc = {s: 0 for s in domain}
+    pdb.set_trace()
     for key in raw_file.keys():
         if key not in all_prediction.keys():
             continue
@@ -94,7 +95,7 @@ def evaluate_metrics(all_prediction, raw_file, detail_log, except_domain):
                 detail_wrongs[key][turn_idx] = detail_wrong
 
             turn_cnt += 1
-
+    pdb.set_trace()
     return (
         joint_acc / joint_cnt,
         turn_acc / turn_cnt,
