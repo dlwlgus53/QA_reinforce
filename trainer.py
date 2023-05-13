@@ -11,6 +11,26 @@ from utils import save_pickle
 logger = logging.getLogger("my")
 
 
+# TODO make it as class
+def tag(args, model, train_loader, train_dataset):
+    model.eval()
+    tag_set = {} # dial_turn_slot_key : value
+    logger.info("Tagging start")
+    with torch.no_grad():
+        for iter, batch in enumerate(train_loader):
+            input_ids = batch["input"]["input_ids"].to("cuda")
+            labels = batch["target"]["input_ids"].to("cuda")
+            outputs_text = model.module.generate(input_ids=input_ids)
+            text = args.tokenizer.batch_decode(outputs_text, skip_special_tokens = True)
+            key_set = [f'{d}_{t}_{s}' for (d,t,s) in zip(batch['dial_id'], batch['turn_id'], batch['schema'])]
+            tag_set.update({k:v for (k,v) in zip(key_set,text)})
+
+    train_dataset.update(tag_set)
+    return loss_sum / iter
+
+
+
+
 def train(args, model, train_loader, optimizer, train_dataset):
     model.train()
     logger.info("Train start")
@@ -59,6 +79,8 @@ def valid(args, model, dev_loader, data_rate, val_dataset):
                 ))
            
     return  loss_sum/iter
+
+
 
 
 
