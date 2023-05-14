@@ -22,6 +22,7 @@ class Dataset(torch.utils.data.Dataset):
         self.description = description
         self.ontology = json.load(open(args.ontology_path,"r"))
         self.pseudo_answer = None
+        self.dict_answer_list  = {}
         
         raw_path = data_path
         if args.do_short :
@@ -65,9 +66,20 @@ class Dataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.dial_id)
     
+    
+    
     def update(self, pseudo_answer):
         logger.info(f"update the pseudo answer, length is {len(pseudo_answer)} ")
         self.pseudo_answer = pseudo_answer
+        acc = [self.pseudo_answer[key] == self.dict_answer_list[key] for key in pseudo_answer.keys()]
+        mask = [self.pseudo_answer[key] == self.ontology["NOT_MENTIONED"] for key in pseudo_answer.keys()]
+        recall= []
+        
+        for idx, m in enumerate(mask):
+            if m != True:
+                recall.append(acc[idx])
+                
+        logger.info(f"acc {sum(acc)/len(acc)}, recall {sum(recall)/len(recall)} (true num : {(len(mask)-sum(mask))/len(mask)})")
         
         
     def seperate_data(self, dataset):
@@ -98,7 +110,11 @@ class Dataset(torch.utils.data.Dataset):
                             a = self.ontology["NOT_MENTIONED"]
 
                         ### Important code!!! ###
-                        if self.data_type == 'train' : a = 'None'
+                        if self.data_type == 'train' :
+                            answer_save_key = f'{d_id}_{t_id}_{key}'
+                            self.dict_answer_list[answer_save_key] = a 
+                            a = 'None'
+                            
                         
                         schema.append(key)
                         answer.append(a)
@@ -133,14 +149,14 @@ class Dataset(torch.utils.data.Dataset):
         schema = self.schema[index]
         question = self.question[index]
         context = self.context[index]
+        
         if self.data_type == 'train' and self.pseudo_answer:
             # PMUL3979_13_taxi-arrive
-            # 
             key = f'{dial_id}_{turn_id}_{schema}'
             answer = self.pseudo_answer[key] 
-            
         else:
             answer = self.answer[index]
+            
         target = {k: v.squeeze() for (k, v) in self.target[index].items()}
 
         return {
