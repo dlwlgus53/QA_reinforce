@@ -93,7 +93,6 @@ def evaluate_metrics(all_prediction, raw_file, detail_log, except_domain):
                 detail_wrongs[key][turn_idx] = detail_wrong
 
             turn_cnt += 1
-    pdb.set_trace()
     return (
         joint_acc / joint_cnt,
         turn_acc / turn_cnt,

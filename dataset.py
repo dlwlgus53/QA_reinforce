@@ -18,9 +18,10 @@ class Dataset(torch.utils.data.Dataset):
         self.data_type = data_type
         self.tokenizer = args.tokenizer
         self.max_length = args.max_length
-        self.except_domain = args.except_domain
+        self.use_domain = args.use_domain
         self.description = description
         self.ontology = json.load(open(args.ontology_path,"r"))
+        self.pseudo_answer = None
         
         raw_path = data_path
         if args.do_short :
@@ -43,6 +44,7 @@ class Dataset(torch.utils.data.Dataset):
         self.question = question
         self.schema = schema
         self.context = context
+        
     def encode(self, texts, return_tensors="pt"):
         examples = []
         for i, text in enumerate(texts):
@@ -62,10 +64,12 @@ class Dataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.dial_id)
+    
     def update(self, pseudo_answer):
-        self.answer = pseudo_answer
+        logger.info(f"update the pseudo answer, length is {len(pseudo_answer)} ")
+        self.pseudo_answer = pseudo_answer
         
-        pdb.set_trace()
+        
     def seperate_data(self, dataset):
         context = defaultdict(lambda: defaultdict(str))  # dial_id, # turn_id
 
@@ -83,30 +87,25 @@ class Dataset(torch.utils.data.Dataset):
                 dialogue_text += "[user] "
                 dialogue_text += turn["user"]
                 for key_idx, key in enumerate(self.ontology["all-domain"]):
-                    if self.data_type == 'train' and self.except_domain in key:
-                        continue  # TODO check this
-
-                    q = self.ontology[key][self.description]
-                    
-                    if self.data_type == 'train' and 'pseudo_belief' not in turn:
-                        turn['pseudo_belief'] = {}
+                    if self.data_type != 'train' or (self.data_type == 'train' and self.use_domain in key):
+                        q = self.ontology[key][self.description]
                         
-                    belief_type = 'belief' if self.data_type != 'train' else 'pseudo_belief'
-                    
-                    if key in turn[belief_type]:  # 언급을 한 경우
-                        a = turn[belief_type][key]
-                        if isinstance(a, list):
-                            a = a[0]  # in muptiple type, a == ['sunday',6]
-                    else:
-                        a = self.ontology["NOT_MENTIONED"]
+                        if key in turn['belief']:  
+                            a = turn['belief'][key]
+                            if isinstance(a, list):
+                                a = a[0] 
+                        else:
+                            a = self.ontology["NOT_MENTIONED"]
 
-
-                    schema.append(key)
-                    answer.append(a)
-                    question.append(q)
-                    dial_id.append(d_id)
-                    turn_id.append(t_id)
-                    context[d_id][t_id] = dialogue_text
+                        ### Important code!!! ###
+                        if self.data_type == 'train' : a = 'None'
+                        
+                        schema.append(key)
+                        answer.append(a)
+                        question.append(q)
+                        dial_id.append(d_id)
+                        turn_id.append(t_id)
+                        context[d_id][t_id] = dialogue_text
 
                 dialogue_text += "[sys] "
                 dialogue_text += turn["response"]
@@ -124,7 +123,7 @@ class Dataset(torch.utils.data.Dataset):
         schema = [s[3] for s in sorted_items]
         answer = [s[4] for s in sorted_items]
         logger.info(f"{self.data_type} length : {len(turn_id)}")
-        logger.info(f"except domain : {self.except_domain} ")
+        logger.info(f"use domain : {self.use_domain} ")
         logger.info(f"Use schemas: {set(schema)} ")
         return turn_id, dial_id, question, schema, answer, context
 
@@ -134,10 +133,18 @@ class Dataset(torch.utils.data.Dataset):
         schema = self.schema[index]
         question = self.question[index]
         context = self.context[index]
-
+        if self.data_type == 'train' and self.pseudo_answer:
+            # PMUL3979_13_taxi-arrive
+            # 
+            key = f'{dial_id}_{turn_id}_{schema}'
+            answer = self.pseudo_answer[key] 
+            
+        else:
+            answer = self.answer[index]
         target = {k: v.squeeze() for (k, v) in self.target[index].items()}
 
         return {
+            "answer": answer,
             "target": target,
             "turn_id": turn_id,
             "question": question,
@@ -156,7 +163,8 @@ class Dataset(torch.utils.data.Dataset):
         turn_id = [x["turn_id"] for x in batch]
         question = [x["question"] for x in batch]
         schema = [x["schema"] for x in batch]
-        target_list = [x["target"] for x in batch]
+        target_list = [x["target"] for x in batch] # this is original
+        answer_list = [x["answer"] for x in batch] # make it as like target
 
         history = [self.context[d][t] for (d, t) in zip(dial_id, turn_id)]
         input_source = [
@@ -195,6 +203,9 @@ if __name__ == "__main__":
     parser.add_argument("--max_length", type=int, default=100)
     parser.add_argument("--except_domain", type=str, default="hotel")
     parser.add_argument("--description", type=str, default="description1")
+    parser.add_argument("--ontology_path", type=str, default="./DST_model/QA.json")
+    parser.add_argument('--short_path' , type = str, default = "../woz_data/dev_data_short.json")
+
 
     args = parser.parse_args()
 

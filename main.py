@@ -45,7 +45,7 @@ parser.add_argument('--train_path' , type = str)
 parser.add_argument('--test_path' , type = str)
 parser.add_argument('--short_path' , type = str, default = "../woz_data/dev_data_short.json")
 parser.add_argument('--ontology_path' , type = str)
-parser.add_argument('--except_domain' , type = str)
+parser.add_argument('--use_domain' , type = str)
 
 
 args = parser.parse_args()

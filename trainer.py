@@ -24,9 +24,7 @@ def tag(args, model, train_loader, train_dataset):
             text = args.tokenizer.batch_decode(outputs_text, skip_special_tokens = True)
             key_set = [f'{d}_{t}_{s}' for (d,t,s) in zip(batch['dial_id'], batch['turn_id'], batch['schema'])]
             tag_set.update({k:v for (k,v) in zip(key_set,text)})
-
     train_dataset.update(tag_set)
-    return loss_sum / iter
 
 
 
