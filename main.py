@@ -116,6 +116,12 @@ def main_worker(DST_model, RW_models):
 
     min_loss = float('inf')
     p =0
+    
+    loss, in_loss, out_loss, acc, in_acc, out_acc = valid(args, DST_model, val_loader)
+    logger.info("pre-test,  Loss : %.04f, In_loss :%04f, Out_loss:%04f, acc:%04f, In_acc :%04f, Out_acc:%04f" 
+            % ( loss, in_loss, out_loss, acc, in_acc, out_acc))
+        
+        
     for epoch in range(args.max_epoch):
         
         # 1. Tagging
