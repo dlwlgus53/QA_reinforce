@@ -9,7 +9,7 @@ import torch.nn as nn
 import pdb
 import init
 from collections import OrderedDict
-from trainer import tag,train, valid, test
+from trainer import tag, train, valid, test
 from torch.utils.data import DataLoader
 
 from transformers import T5Tokenizer, T5ForConditionalGeneration,Adafactor
@@ -28,6 +28,7 @@ parser.add_argument('--RW1_model' , type = str,  help = 'pretrainned model')
 parser.add_argument('--RW2_model' , type = str,  help = 'pretrainned model')
 parser.add_argument('--RW3_model' , type = str,  help = 'pretrainned model')
 parser.add_argument('--base_trained' , type = str,  default='t5-small', help = 'pretrainned model')
+parser.add_argument('-patience', default=5, type=int,help='patience')
 
 
 '''saving'''
@@ -72,9 +73,10 @@ def get_loader(dataset,batch_size):
         dataset=dataset, batch_size=batch_size, pin_memory=pin_memory,
         num_workers=0, shuffle=shuffle,  collate_fn=dataset.collate_fn)
     return loader       
+
 def get_optimizer(model):
-    opt = Adafactor(model.parameters(),lr=1e-6, # TODO test here with 1e-5
-                    eps=(1e-30, 1e-6),
+    opt = Adafactor(model.parameters(),lr=1e-3,
+                    eps=(1e-30, 1e-3),
                     clip_threshold=1.0,
                     decay_rate=-0.8,
                     beta1=None,
@@ -112,18 +114,38 @@ def main_worker(DST_model, RW_models):
     
     DST_model_opt = get_optimizer(DST_model)
 
-    logger.info("Training start")
     min_loss = float('inf')
+    p =0
     for epoch in range(args.max_epoch):
-        tag(args, DST_model, train_loader, train_dataset)
-        # TODO finishi the tag function
-        # cal_reward(args, DST_model, train_loader)
-        # train(args, DST_model, train_loader, optimizer, train_dataset)
-        # loss = validation()
-        # if min_loss>loss:
-            # loss = min_loss
-            # torch.save(DST_model.state_dict(), f"model/woz{args.save_prefix}/epoch_{epoch}r_{args.data_rate}loss_{loss:.4f}.pt")
+        
+        # 1. Tagging
+        tagged_set = tag(args, DST_model, train_loader, train_dataset)
+        train_dataset.update(tagged_set)
+        train_loader = get_loader(train_dataset, batch_size)
+        # 2. Reward
+        reward = 0
+        for RW_model in RW_models:    
+            pass
+            # reward += cal_reward(args, DST_model, train_loader)
             
+        # 3. Train
+        train(args, DST_model, train_loader, DST_model_opt)
+        
+        # 4. Validation
+        loss = valid(args, DST_model, val_loader)
+        logger.info("Epoch : %d,  Loss : %.04f" % (epoch, loss))
+        logger.info("patience : %d/%d" % (p, args.patience))
+                    
+        # 5. Save
+        if min_loss>loss:
+            p =0
+            loss = min_loss
+            torch.save(DST_model.state_dict(), f"model/woz{args.save_prefix}/epoch_{epoch}d_{args.use_domain}loss_{loss:.4f}.pt")
+        else:
+            p +=1
+        if p > args.patience:
+            logger.info("early stopping")
+            break
         
         
         

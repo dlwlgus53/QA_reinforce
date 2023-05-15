@@ -24,12 +24,20 @@ def tag(args, model, train_loader, train_dataset):
             text = args.tokenizer.batch_decode(outputs_text, skip_special_tokens = True)
             key_set = [f'{d}_{t}_{s}' for (d,t,s) in zip(batch['dial_id'], batch['turn_id'], batch['schema'])]
             tag_set.update({k:v for (k,v) in zip(key_set,text)})
-    train_dataset.update(tag_set)
+            
+            if (iter + 1) % 50 == 0:
+
+                logger.info('step : {}/{} '.format(
+                    iter, 
+                    str(len(train_loader)),
+                    )
+                )
+                
+            
+    return tag_set
 
 
-
-
-def train(args, model, train_loader, optimizer, train_dataset):
+def train(args, model, train_loader, optimizer):
     model.train()
     logger.info("Train start")
     for iter, batch in enumerate(train_loader):
@@ -40,12 +48,14 @@ def train(args, model, train_loader, optimizer, train_dataset):
         outputs = model(input_ids=input_ids, labels=labels)
         outputs_text = model.module.generate(input_ids=input_ids)
         outputs_text = [args.tokenizer.decode(o).replace('</s>','').replace('<pad>','').strip() for o in outputs_text]
-        
+        label_text = [args.tokenizer.decode(o).replace('</s>','').replace('<pad>','').strip() for o in labels]
         loss =outputs.loss.mean()
         loss.backward()
         optimizer.step()
     
         if (iter + 1) % 50 == 0:
+            logger.info(f"answer : {label_text[:3]}")
+            logger.info(f"generated : {outputs_text[:3]}")
             logger.info('step : {}/{} Loss: {:.4f}'.format(
                 iter, 
                 str(len(train_loader)),
@@ -53,15 +63,36 @@ def train(args, model, train_loader, optimizer, train_dataset):
             )
         
 
-def valid(args, model, dev_loader, data_rate, val_dataset):
+def valid(args, model, val_loader):
+    model.eval()
+    loss_sum = 0
+    logger.info("Validation start")
+    with torch.no_grad():
+        for iter,batch in enumerate(val_loader):
+            input_ids = batch['input']['input_ids'].to('cuda')
+            labels = batch['target']['input_ids'].to('cuda')
+        
+            outputs = model(input_ids=input_ids, labels=labels)
+            outputs_text = model.module.generate(input_ids=input_ids)
+            outputs_text = [args.tokenizer.decode(o).replace('</s>','').replace('<pad>','').strip() for o in outputs_text]
+            loss_sum += outputs.loss.mean().detach()
+            if (iter + 1) % 50 == 0:
+                logger.info('step : {}/{} Loss: {:.4f}'.format(
+                iter, 
+                str(len(val_loader)),
+                outputs.loss.mean().detach()
+                ))
+           
+    return  loss_sum/iter
+
+
+
+def get_reward(args, model, train_loader):
     model.eval()
     loss_sum = 0
     logger.info("Validation start")
     with torch.no_grad():
         for iter,batch in enumerate(dev_loader):
-            # if iter/len(dev_loader) > data_rate:
-            #     break
-            
             input_ids = batch['input']['input_ids'].to('cuda')
             labels = batch['target']['input_ids'].to('cuda')
         
@@ -77,10 +108,6 @@ def valid(args, model, dev_loader, data_rate, val_dataset):
                 ))
            
     return  loss_sum/iter
-
-
-
-
 
 def test(args, model, test_loader, test_dataset):
     belief_state= defaultdict(lambda : defaultdict(dict))# dial_id, # turn_id # schema

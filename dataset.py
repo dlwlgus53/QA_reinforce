@@ -39,7 +39,7 @@ class Dataset(torch.utils.data.Dataset):
         )
 
         self.answer = answer  # for debugging
-        self.target = self.encode(answer) # TODO  not in here, do it later
+        # self.target = self.encode(answer) # TODO  not in here, do it later
         self.turn_id = turn_id
         self.dial_id = dial_id
         self.question = question
@@ -78,9 +78,7 @@ class Dataset(torch.utils.data.Dataset):
         for idx, m in enumerate(mask):
             if m != True:
                 recall.append(acc[idx])
-                
-        logger.info(f"acc {sum(acc)/len(acc)}, recall {sum(recall)/len(recall)} (true num : {(len(mask)-sum(mask))/len(mask)})")
-        
+        logger.info(f"acc {sum(acc)/len(acc):.4f}, recall {sum(recall)/len(recall):.4f} (true num : {(len(mask)-sum(mask))/len(mask):.4f})")
         
     def seperate_data(self, dataset):
         context = defaultdict(lambda: defaultdict(str))  # dial_id, # turn_id
@@ -149,19 +147,15 @@ class Dataset(torch.utils.data.Dataset):
         schema = self.schema[index]
         question = self.question[index]
         context = self.context[index]
-        
         if self.data_type == 'train' and self.pseudo_answer:
-            # PMUL3979_13_taxi-arrive
+            if index == 0:
+                logger.info("use pseudo answer")
             key = f'{dial_id}_{turn_id}_{schema}'
             answer = self.pseudo_answer[key] 
         else:
             answer = self.answer[index]
-            
-        target = {k: v.squeeze() for (k, v) in self.target[index].items()}
-
         return {
             "answer": answer,
-            "target": target,
             "turn_id": turn_id,
             "question": question,
             "context": context,
@@ -179,8 +173,8 @@ class Dataset(torch.utils.data.Dataset):
         turn_id = [x["turn_id"] for x in batch]
         question = [x["question"] for x in batch]
         schema = [x["schema"] for x in batch]
-        target_list = [x["target"] for x in batch] # this is original
-        answer_list = [x["answer"] for x in batch] # make it as like target
+        # target_list = [x["target"] for x in batch] # this is original
+        answer = [x["answer"] for x in batch] # make it as like target
 
         history = [self.context[d][t] for (d, t) in zip(dial_id, turn_id)]
         input_source = [
@@ -192,7 +186,10 @@ class Dataset(torch.utils.data.Dataset):
         ]
 
         source = self.encode(input_source)
+        target = self.encode(answer)
+        
         source_list = [{k: v.squeeze() for (k, v) in s.items()} for s in source]
+        target_list = [{k: v.squeeze() for (k, v) in s.items()} for s in target]
 
         pad_source = self.tokenizer.pad(source_list, padding=True)
         pad_target = self.tokenizer.pad(target_list, padding=True)
