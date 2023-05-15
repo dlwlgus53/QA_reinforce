@@ -123,17 +123,19 @@ def main_worker(DST_model, RW_models):
         train_dataset.update(tagged_set)
         train_loader = get_loader(train_dataset, batch_size)
         # 2. Reward
+
         reward = 0
         for RW_model in RW_models:    
-            pass
             # reward += cal_reward(args, DST_model, train_loader)
+            pass
             
         # 3. Train
         train(args, DST_model, train_loader, DST_model_opt)
         
         # 4. Validation
-        loss = valid(args, DST_model, val_loader)
-        logger.info("Epoch : %d,  Loss : %.04f" % (epoch, loss))
+        loss, in_loss, out_loss = valid(args, DST_model, val_loader)
+        logger.info("Epoch : %d,  Loss : %.04f, In_loss :%04f, Out_loss:%04f" 
+                    % (epoch, loss, in_loss, out_loss))
         logger.info("patience : %d/%d" % (p, args.patience))
                     
         # 5. Save

@@ -39,7 +39,6 @@ class Dataset(torch.utils.data.Dataset):
         )
 
         self.answer = answer  # for debugging
-        # self.target = self.encode(answer) # TODO  not in here, do it later
         self.turn_id = turn_id
         self.dial_id = dial_id
         self.question = question

@@ -5,7 +5,7 @@ import logging
 import ontology
 from utils import*
 from collections import defaultdict
-
+import torch.nn as nn
 from utils import save_pickle
 
 logger = logging.getLogger("my")
@@ -65,25 +65,45 @@ def train(args, model, train_loader, optimizer):
 
 def valid(args, model, val_loader):
     model.eval()
-    loss_sum = 0
+    loss_sum, in_loss_sum, out_loss_sum = 0, 0, 0
     logger.info("Validation start")
+    criterion = nn.CrossEntropyLoss(reduction = 'none')
+    losses, mask = [], []
     with torch.no_grad():
         for iter,batch in enumerate(val_loader):
             input_ids = batch['input']['input_ids'].to('cuda')
             labels = batch['target']['input_ids'].to('cuda')
-        
             outputs = model(input_ids=input_ids, labels=labels)
             outputs_text = model.module.generate(input_ids=input_ids)
             outputs_text = [args.tokenizer.decode(o).replace('</s>','').replace('<pad>','').strip() for o in outputs_text]
-            loss_sum += outputs.loss.mean().detach()
+            logit_length =  [logit.shape[0] for logit in outputs.logits]
+            losses_raw = criterion(outputs.logits.view(-1, outputs.logits.shape[-1]), labels.view(-1))
+            start = 0
+            
+            for length in logit_length:
+                sublist = losses_raw[start : start + length]
+                sublist_sum = sublist.mean().detach().item()
+                losses.append(sublist_sum)
+                start += length
+            mask += [args.use_domain in item for item in batch['schema']]
+
             if (iter + 1) % 50 == 0:
                 logger.info('step : {}/{} Loss: {:.4f}'.format(
                 iter, 
                 str(len(val_loader)),
                 outputs.loss.mean().detach()
                 ))
+                
+                
+            
+        losses = torch.tensor(losses)
+        mask = torch.tensor(mask)
+        in_loss_sum = (losses * mask).sum() / mask.sum()
+        out_loss_sum  = (losses * ~mask).sum() / (~mask).sum()
+        loss_sum = outputs.loss.mean().item()
            
-    return  loss_sum/iter
+    return  loss_sum/iter, in_loss_sum.item()/iter, out_loss_sum.item()/iter
+
 
 
 
