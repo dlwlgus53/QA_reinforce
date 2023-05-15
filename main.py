@@ -133,9 +133,9 @@ def main_worker(DST_model, RW_models):
         train(args, DST_model, train_loader, DST_model_opt)
         
         # 4. Validation
-        loss, in_loss, out_loss = valid(args, DST_model, val_loader)
-        logger.info("Epoch : %d,  Loss : %.04f, In_loss :%04f, Out_loss:%04f" 
-                    % (epoch, loss, in_loss, out_loss))
+        loss, in_loss, out_loss, acc, in_acc, out_acc = valid(args, DST_model, val_loader)
+        logger.info("Epoch : %d,  Loss : %.04f, In_loss :%04f, Out_loss:%04f, acc:%04f, In_acc :%04f, Out_acc:%04f" 
+                    % (epoch, loss, in_loss, out_loss, acc, in_acc, out_acc))
         logger.info("patience : %d/%d" % (p, args.patience))
                     
         # 5. Save
